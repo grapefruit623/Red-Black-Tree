@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+import math
+import matplotlib.pyplot as plt
+from matplotlib.pyplot import text
+from matplotlib.pyplot import arrow
 '''
     red-black Btree test
     current is binary tree
@@ -25,6 +29,7 @@ class node(object):
     def color(self, newColor):
         self._color = newColor
 
+
     def __str__(self):
         d = None
         if self == self.parent.left:
@@ -43,12 +48,17 @@ class rbTree(object):
     def __init__(self):
         self.root = None 
         self.nil = node( -1, None, 'black' ) #null節點，用來當葉節點與根節點的父親
+        self.treeSize = 0 #總共幾個節點
 
 
     def __str__(self):
         output = []
         self.DFS( self.root, output )
         return str( output )
+
+    def __len__(self):
+        return self.treeSize
+
     def DFS( self, curNode, output):
         if self.nil == curNode:
             return
@@ -59,6 +69,8 @@ class rbTree(object):
         return
             
     def insert(self, content):
+        self.treeSize += 1
+
         thisNode = node( content )
         thisNode.left = self.nil
         thisNode.right = self.nil
@@ -184,21 +196,89 @@ class rbTree(object):
             if x.parent == self.nil:
                 self.root = x
 
+'''
+    畫出紅黑樹的簡單示意圖
+    不然每次都要用樹的走訪來看紅黑樹內容，太不方便了
+    尤其是現在紅黑樹還有bug！
+
+    不會畫出nil節點
+'''
+def drawRbTree( tree ):
+    scale = 0.8 #畫圖時的間距
+    print tree.root
+
+    rootNode = (0,0) #繪圖用的根節點 
+    
+
+    treeSize = len(tree)
+    treeLevel = math.floor( math.log( treeSize*2, 2 ) )
+    maxTreeLeaves = 2**treeLevel / 2
+
+    print 'tree size: ', treeSize 
+    print 'tree level: ', treeLevel 
+    print 'tree leaves max amount: ',  maxTreeLeaves
+
+
+    treeLevelOrder = []
+    nodeCount = 0 # 用以知道是第幾個節點，才方便知道是第幾層的節點 
+
+    treeLevelOrder.append( tree.root ) # 用來作level order的走訪
+    drawTreeQueue = []
+    drawTreeQueue.append( rootNode )  #存放節點的座標，用以繪圖，節點位置的新增同level order走訪
+
+    '''
+        樹的level order走訪
+    '''
+    while treeLevelOrder != []:
+        node = treeLevelOrder.pop(0)
+        nodePos = drawTreeQueue.pop(0)
+        text( nodePos[0], nodePos[1], node.content, color=node.color, size=20 )
+        fX, fY = nodePos[0], nodePos[1] #紀錄本次節點的位置，用在調整它的子節點的位置
+
+        if node.left != tree.nil:
+            treeLevelOrder.append( node.left )
+            nodeCount += 1
+            '''
+                左節點的位置微調是考慮到以父親的位置往左微調，微調幅度則是以位於第幾層控制
+                math.log( (nodeCount+1), 2 )是用來算第幾層，階層越往下，偏移程度越低
+            '''
+            fX_shift = fX - scale/math.floor( math.log( (nodeCount+1), 2 ) )
+            fY_shift = fY-0.5
+            drawTreeQueue.append( ( fX_shift, fY_shift  ) )
+            plt.plot( [ fX, fX_shift ], [ fY, fY_shift ], 'k-'  )
+        if node.right != tree.nil:
+            treeLevelOrder.append( node.right )
+            nodeCount += 1
+            '''
+                右節點的位置微調是考慮到以父親的位置往右微調，微調幅度則是以位於第幾層控制
+                math.log( (nodeCount+1), 2 )是用來算第幾層，階層越往下，偏移程度越低
+            '''
+            fX_shift = fX + scale/math.floor( math.log( (nodeCount+1), 2 ) )
+            fY_shift = fY-0.5
+            drawTreeQueue.append( ( fX_shift, fY_shift  ) )
+            plt.plot( [ fX, fX_shift ], [ fY, fY_shift ], 'k-'  )
+
+    plt.xticks(range(-2,3))
+    plt.yticks(range(-2,1))
+    plt.show()
+    
+
 if __name__ == '__main__':
    tree = rbTree()
    #這個例子似乎違反紅黑樹的不能有重複紅色節點
    #且DFS 順序好像怪怪的
-   #a = [13,11,8,6,14,4,9,10]
+   a = [13,11,8,6,14,4,9,10]
    #a = [13,11,8,6,1,17,15,25,22,27]
    #a = [13,8,17,1,11,15,25,6,22,27]
     # 70-60-65: LRb error?
-   a = [50,10,80,90,70,60]
+   #a = [50,10,80,90,70,60]
+   #a = [ 50, 10, 80 ]
 
    for i in a:
        tree.insert(i)
    print '---DFS---'
    print tree
-   print 'root: ',tree.root
+   drawRbTree( tree )
    '''
    print 'left rotate in node 13'
    tree.left_rotate(13)
