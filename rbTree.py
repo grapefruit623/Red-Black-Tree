@@ -32,11 +32,14 @@ class node(object):
 
     def __str__(self):
         d = None
-        if self == self.parent.left:
-            d = 'left'
-        elif self == self.parent.right:
-            d = 'right'
-        return str( ( self.content, self.color, d, self.parent ) ) 
+        if self.parent != None:
+            if self == self.parent.left:
+                d = 'left'
+            elif self == self.parent.right:
+                d = 'right'
+            return str( ( self.content, self.color, d, self.parent ) ) 
+        else:
+            return '( nil node )' 
 
     '''
         __repr__ vs __str__???
@@ -80,6 +83,7 @@ class rbTree(object):
             self.root.parent = self.nil
             self.root.left = self.nil
             self.root.right = self.nil
+            self.nil.left = self.root
         else:
             currentNode = self.root
             insertSuccess = False
@@ -105,7 +109,7 @@ class rbTree(object):
         self.rb_insert_fixup( thisNode )
 
     def binarySearch(self, current, content):
-        if None == current: # empty tree
+        if None == current or self.nil == current: # empty tree
             return None
 
         if content < current.content: 
@@ -121,36 +125,39 @@ class rbTree(object):
         性質定義出自"Fundamentals of Data Structures in C" 這本書
     '''
     def rb_insert_fixup(self, node ):
-        while 'red' == node.parent.color:
-            if node.parent == node.parent.parent.left:
-                uncle = node.parent.parent.right
+        print 'rb_insert_fixup: ', node
+        father = node.parent
+        grandpa = father.parent
+        while 'red' == father.color:
+            if father == grandpa.left:
+                uncle = grandpa.right
                 if 'red' == uncle.color:
-                    node.parent.color = 'black'
+                    father.color = 'black'
                     uncle.color = 'black'
-                    node.parent.parent.color = 'red'
-                    node = node.parent.parent # 往上檢查
+                    grandpa.color = 'red'
+                    node = grandpa # 往上檢查
                 else: 
-                    if node == node.parent.right:
-                        node = node.parent # 是否具備改變while loop的意義？
+                    if node == father.right:
+                        node = father # 是否具備改變while loop的意義？
                         self.left_rotate( node.content )
-                    node.parent.color = 'black'
-                    node.parent.parent.color = 'red'
-                    self.right_rotate( node.parent.content )
+                    father.color = 'black'
+                    grandpa.color = 'red'
+                    self.right_rotate( grandpa.content )
             else:
-                uncle = node.parent.parent.left
+                uncle = grandpa.left
                 if 'red' == uncle.color:
-                    node.parent.color = 'black'
+                    father.color = 'black'
                     uncle.color = 'black'
-                    node.parent.parent.color = 'red'
-                    node = node.parent.parent # 往上檢查
+                    grandpa.color = 'red'
+                    node = grandpa # 往上檢查
                 else:
-                    if node == node.parent.left:
-                        node = node.parent # 是否具備改變while loop的意義？
+                    if node == father.left:
+                        node = father # 是否具備改變while loop的意義？
                         self.left_rotate( node.content )
-                    node.parent.color = 'black'
-                    node.parent.parent.color = 'red'
+                    father.color = 'black'
+                    grandpa.color = 'red'
                     #這行是否該改成left_rotate
-                    self.left_rotate( node.parent.content )
+                    self.left_rotate( grandpa.content )
         self.root.color = 'black'
 
     def left_rotate(self, target):
@@ -158,9 +165,27 @@ class rbTree(object):
         # 連結斷了？？
         print 'left_rotate', target
         x = self.binarySearch(self.root, target)
-        print x
         father = x.parent
+        print 'x, father: ', x, father
 
+        rightSubtree = x.right
+        if self.nil != rightSubtree:
+            newRight = rightSubtree.left
+            rightSubtree.left = x
+            x.right = newRight
+            x.parent = rightSubtree
+            newRight.parent = x
+
+            if father.left == x:
+                father.left = rightSubtree
+                rightSubtree.parent = father
+            elif father.right == x:
+                father.right = rightSubtree
+                rightSubtree.parent = father
+
+            if rightSubtree.parent == self.nil:
+                self.root = rightSubtree
+        '''
         if self.nil != father:
             if father == father.parent.right:
                 father.parent.right = x
@@ -175,6 +200,7 @@ class rbTree(object):
 
             if x.parent == self.nil:
                 self.root = x
+        '''
 
     def right_rotate(self, target):
         print '-----------'
@@ -182,6 +208,24 @@ class rbTree(object):
         x = self.binarySearch(self.root, target)
         father = x.parent
 
+        leftSubtree = x.left
+        if self.nil != leftSubtree:
+            newLeft = leftSubtree.right
+            leftSubtree.right = x
+            x.left = newLeft 
+            x.parent = leftSubtree
+            newLeft.parent = x
+
+            if father.left == x:
+                father.left = leftSubtree
+                leftSubtree.parent = father
+            elif father.right == x:
+                father.right = leftSubtree
+                leftSubtree.parent = father
+
+            if leftSubtree.parent == self.nil:
+                self.root = leftSubtree
+        '''
         if self.nil != father: #不是根
             if father == father.parent.right:
                 father.parent.right = x
@@ -195,6 +239,7 @@ class rbTree(object):
 
             if x.parent == self.nil:
                 self.root = x
+        '''
 
 '''
     畫出紅黑樹的簡單示意圖
@@ -205,7 +250,8 @@ class rbTree(object):
 '''
 def drawRbTree( tree ):
     scale = 0.8 #畫圖時的間距
-    print tree.root
+    print '-'*30
+    print 'root: ',tree.root
 
     rootNode = (0,0) #繪圖用的根節點 
     
@@ -217,6 +263,7 @@ def drawRbTree( tree ):
     print 'tree size: ', treeSize 
     print 'tree level: ', treeLevel 
     print 'tree leaves max amount: ',  maxTreeLeaves
+    print '-'*30
 
 
     treeLevelOrder = []
@@ -267,22 +314,35 @@ if __name__ == '__main__':
    tree = rbTree()
    #這個例子似乎違反紅黑樹的不能有重複紅色節點
    #且DFS 順序好像怪怪的
-   a = [13,11,8,6,14,4,9,10]
-   #a = [13,11,8,6,1,17,15,25,22,27]
+   #a = [13,11,8,6,14,4,9,10]
+   '''
+        輸入到15時，樹的形狀和網路範例不同
+        但好像還是符合紅黑樹定義 <=== 不對！！
+        出現了連續的紅色節點！！！
+   '''
+   a = [13,11,8,6,1,17,15]
    #a = [13,8,17,1,11,15,25,6,22,27]
     # 70-60-65: LRb error?
-   #a = [50,10,80,90,70,60]
+   #a = [50,10,80,90,70,60,55]
    #a = [ 50, 10, 80 ]
+   #a = [ 70, 60, 58, 65, 63 ]
 
    for i in a:
        tree.insert(i)
-   print '---DFS---'
-   print tree
-   drawRbTree( tree )
    '''
-   print 'left rotate in node 13'
-   tree.left_rotate(13)
+        目標，把旋轉修正好，以node 60左旋，代表node 60會變子樹
+        而非目前以node 65轉 才會得到正確樹
+
+        目前的左右旋轉先修改完畢
+        插入似乎完成了？ 但是樹長的跟網路上的demo有點不同
+        但是知其然，而不知其所以然
+        我目前不知道rb_insert_fixup的原理
+   '''
+   drawRbTree( tree )
    print tree
+   '''
+   tree.right_rotate(70)
+   drawRbTree( tree )
    '''
 
 
