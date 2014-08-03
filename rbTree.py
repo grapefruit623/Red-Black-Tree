@@ -142,9 +142,10 @@ class rbTree(object):
                         if node == father.right:
                             node = father # 是否具備改變while loop的意義？
                             self.left_rotate( node.content )
-                        father.color = 'black'
-                        grandpa.color = 'red'
-                        self.right_rotate( grandpa.content )
+                        else:
+                            father.color = 'black'
+                            grandpa.color = 'red'
+                            self.right_rotate( grandpa.content )
                 else:
                     uncle = grandpa.left
                     if 'red' == uncle.color:
@@ -156,10 +157,11 @@ class rbTree(object):
                         if node == father.left:
                             node = father # 是否具備改變while loop的意義？
                             self.right_rotate( node.content )
-                        father.color = 'black'
-                        grandpa.color = 'red'
-                        #這行是否該改成left_rotate
-                        self.left_rotate( grandpa.content )
+                        else:
+                            father.color = 'black'
+                            grandpa.color = 'red'
+                            #這行是否該改成left_rotate
+                            self.left_rotate( grandpa.content )
             self.root.color = 'black'
 
     def left_rotate(self, target):
@@ -326,6 +328,7 @@ if __name__ == '__main__':
    a = [13,8,17,1,11,15,25,6,22,27]
     # 70-60-65: LRb error?
    a = [50,10,80,90,70,60,55]
+   #a = [13, 17, 15]
    #a = [ 70, 60, 65 ]
    #a = [ 70, 60, 58, 65, 63 ]
 
