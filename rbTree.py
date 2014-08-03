@@ -127,38 +127,40 @@ class rbTree(object):
     def rb_insert_fixup(self, node ):
         print 'rb_insert_fixup: ', node
         father = node.parent
-        grandpa = father.parent
         while 'red' == father.color:
-            if father == grandpa.left:
-                uncle = grandpa.right
-                if 'red' == uncle.color:
-                    father.color = 'black'
-                    uncle.color = 'black'
-                    grandpa.color = 'red'
-                    node = grandpa # 往上檢查
-                else: 
-                    if node == father.right:
-                        node = father # 是否具備改變while loop的意義？
-                        self.left_rotate( node.content )
-                    father.color = 'black'
-                    grandpa.color = 'red'
-                    self.right_rotate( grandpa.content )
-            else:
-                uncle = grandpa.left
-                if 'red' == uncle.color:
-                    father.color = 'black'
-                    uncle.color = 'black'
-                    grandpa.color = 'red'
-                    node = grandpa # 往上檢查
+            father = node.parent
+            grandpa = father.parent
+            if grandpa != self.nil:
+                if father == grandpa.left:
+                    uncle = grandpa.right
+                    if 'red' == uncle.color:
+                        father.color = 'black'
+                        uncle.color = 'black'
+                        grandpa.color = 'red'
+                        node = grandpa # 往上檢查
+                    else: 
+                        if node == father.right:
+                            node = father # 是否具備改變while loop的意義？
+                            self.left_rotate( node.content )
+                        father.color = 'black'
+                        grandpa.color = 'red'
+                        self.right_rotate( grandpa.content )
                 else:
-                    if node == father.left:
-                        node = father # 是否具備改變while loop的意義？
-                        self.left_rotate( node.content )
-                    father.color = 'black'
-                    grandpa.color = 'red'
-                    #這行是否該改成left_rotate
-                    self.left_rotate( grandpa.content )
-        self.root.color = 'black'
+                    uncle = grandpa.left
+                    if 'red' == uncle.color:
+                        father.color = 'black'
+                        uncle.color = 'black'
+                        grandpa.color = 'red'
+                        node = grandpa # 往上檢查
+                    else:
+                        if node == father.left:
+                            node = father # 是否具備改變while loop的意義？
+                            self.right_rotate( node.content )
+                        father.color = 'black'
+                        grandpa.color = 'red'
+                        #這行是否該改成left_rotate
+                        self.left_rotate( grandpa.content )
+            self.root.color = 'black'
 
     def left_rotate(self, target):
         print '-----------'
@@ -320,11 +322,11 @@ if __name__ == '__main__':
         但好像還是符合紅黑樹定義 <=== 不對！！
         出現了連續的紅色節點！！！
    '''
-   a = [13,11,8,6,1,17,15]
-   #a = [13,8,17,1,11,15,25,6,22,27]
+   #a = [13,11,8,6,1,17,15]
+   a = [13,8,17,1,11,15,25,6,22,27]
     # 70-60-65: LRb error?
-   #a = [50,10,80,90,70,60,55]
-   #a = [ 50, 10, 80 ]
+   a = [50,10,80,90,70,60,55]
+   #a = [ 70, 60, 65 ]
    #a = [ 70, 60, 58, 65, 63 ]
 
    for i in a:
