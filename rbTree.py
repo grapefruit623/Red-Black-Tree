@@ -128,40 +128,41 @@ class rbTree(object):
         print 'rb_insert_fixup: ', node
         father = node.parent
         while 'red' == father.color:
-            father = node.parent
             grandpa = father.parent
-            if grandpa != self.nil:
-                if father == grandpa.left:
-                    uncle = grandpa.right
-                    if 'red' == uncle.color:
-                        father.color = 'black'
-                        uncle.color = 'black'
-                        grandpa.color = 'red'
-                        node = grandpa # 往上檢查
-                    else: 
-                        if node == father.right:
-                            node = father # 是否具備改變while loop的意義？
-                            self.left_rotate( node.content )
-                        else:
-                            father.color = 'black'
-                            grandpa.color = 'red'
-                            self.right_rotate( grandpa.content )
-                else:
-                    uncle = grandpa.left
-                    if 'red' == uncle.color:
-                        father.color = 'black'
-                        uncle.color = 'black'
-                        grandpa.color = 'red'
-                        node = grandpa # 往上檢查
+            if father == grandpa.left:
+                uncle = grandpa.right
+                if 'red' == uncle.color:
+                    father.color = 'black'
+                    uncle.color = 'black'
+                    grandpa.color = 'red'
+                    node = grandpa # 往上檢查
+                else: 
+                    if node == father.right:
+                        node = father # 是否具備改變while loop的意義？
+                        self.left_rotate( node.content )
                     else:
-                        if node == father.left:
-                            node = father # 是否具備改變while loop的意義？
-                            self.right_rotate( node.content )
-                        else:
-                            father.color = 'black'
-                            grandpa.color = 'red'
-                            #這行是否該改成left_rotate
-                            self.left_rotate( grandpa.content )
+                        father.color = 'black'
+                        grandpa.color = 'red'
+                        self.right_rotate( grandpa.content )
+            else:
+                uncle = grandpa.left
+                if 'red' == uncle.color:
+                    father.color = 'black'
+                    uncle.color = 'black'
+                    grandpa.color = 'red'
+                    node = grandpa # 往上檢查
+                else:
+                    if node == father.left:
+                        node = father # 是否具備改變while loop的意義？
+                        self.right_rotate( node.content )
+                    else:
+                        father.color = 'black'
+                        grandpa.color = 'red'
+                        #這行是否該改成left_rotate
+                        self.left_rotate( grandpa.content )
+
+            #忘記要重設father.....orz
+            father = node.parent
             self.root.color = 'black'
 
     def left_rotate(self, target):
@@ -331,6 +332,12 @@ if __name__ == '__main__':
    #a = [13, 17, 15]
    #a = [ 70, 60, 65 ]
    #a = [ 70, 60, 58, 65, 63 ]
+   '''
+       在插入節點35後,  出現了連續的紅色節點 
+       插入35後，節點60應成為新root
+         
+   '''
+   a = [ 80, 60, 120, 40, 70, 140, 20, 50,35]
 
    for i in a:
        tree.insert(i)
